@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.12173437.xyz/"/>
-  <updated>2021-02-23T14:09:57.900Z</updated>
+  <updated>2021-02-23T17:06:13.165Z</updated>
   <id>https://www.12173437.xyz/</id>
   
   <author>
@@ -21,7 +21,7 @@
     <link href="https://www.12173437.xyz/2020/05/12/%E5%9F%BA%E4%BA%8Eesp8266%E7%9A%84nodemcu%E6%A8%A1%E5%9D%97%E7%9A%84%E6%89%A9%E5%B1%95%E6%9D%BF%E8%AE%BE%E8%AE%A1/"/>
     <id>https://www.12173437.xyz/2020/05/12/%E5%9F%BA%E4%BA%8Eesp8266%E7%9A%84nodemcu%E6%A8%A1%E5%9D%97%E7%9A%84%E6%89%A9%E5%B1%95%E6%9D%BF%E8%AE%BE%E8%AE%A1/</id>
     <published>2020-05-12T09:28:00.000Z</published>
-    <updated>2021-02-23T14:09:57.900Z</updated>
+    <updated>2021-02-23T17:06:13.165Z</updated>
     
     <summary type="html">
     
@@ -30,26 +30,15 @@
 &lt;li&gt;板子图片&lt;/li&gt;
 &lt;/ul&gt;
 &lt;center&gt;第一次打板的产品 正面（手动布线，没有检查）&lt;/center&gt;
-![](https://tuchuang-1251287103.cos.ap-chongqing.myqcloud.com/tuchuangNodeMCU%E6%89%A9%E5%B1%95%E6%9D%BF%EF%BC%881%EF%BC%89.jpg)
 
+&lt;p&gt;&lt;img data-src=&quot;https://tuchuang-1251287103.cos.ap-chongqing.myqcloud.com/tuchuangNodeMCU%E6%89%A9%E5%B1%95%E6%9D%BF%EF%BC%881%EF%BC%89.jpg&quot; alt&gt;&lt;/p&gt;
 &lt;center&gt;第一次打板的产品 反面（手动布线，没有检查，有问题，后面飞线解决）&lt;/center&gt;
-![](https://tuchuang-1251287103.cos.ap-chongqing.myqcloud.com/tuchuangNodeMCU%E6%89%A9%E5%B1%95%E6%9D%BF%EF%BC%882%EF%BC%89.jpg)
 
-
+&lt;p&gt;&lt;img data-src=&quot;https://tuchuang-1251287103.cos.ap-chongqing.myqcloud.com/tuchuangNodeMCU%E6%89%A9%E5%B1%95%E6%9D%BF%EF%BC%882%EF%BC%89.jpg&quot; alt&gt;&lt;/p&gt;
 &lt;p&gt;&amp;emsp; 第一次画板没有什么经验，直接画PCB，所以不能通过线路检查直接打板，问题多多。第二次研究了一些一些esp8266的电路图，然后参照，就有了下面的这个图。&lt;/p&gt;
 &lt;center&gt;扩展版2.0电路图&lt;/center&gt;
- ![](https://tuchuang-1251287103.cos.ap-chongqing.myqcloud.com/tuchuangNodeMCU%E6%89%A9%E5%B1%95%E6%9D%BF%E5%8E%9F%E7%90%86%E5%9B%BE.PNG)
 
-
-&lt;center&gt;正面&lt;/center&gt;
- ![](https://tuchuang-1251287103.cos.ap-chongqing.myqcloud.com/tuchuangNodeMCU%E6%89%A9%E5%B1%95%E6%9D%BF%EF%BC%883%EF%BC%89.png)
-
-
-&lt;center&gt;反面&lt;/center&gt;
- ![](https://tuchuang-1251287103.cos.ap-chongqing.myqcloud.com/tuchuangNodeMCU%E6%89%A9%E5%B1%95%E6%9D%BF%EF%BC%884%EF%BC%89.png)
-
-
-&lt;h2 id=&quot;扩展口信息&quot;&gt;&lt;a href=&quot;#扩展口信息&quot; class=&quot;headerlink&quot; title=&quot;扩展口信息&quot;&gt;&lt;/a&gt;扩展口信息&lt;/h2&gt;
+&lt;p&gt;&lt;img data-src=&quot;https://tuchuang-1251287103.cos.ap-chongqing.myqcloud.com/tuchuangNodeMCU%E6%89%A9%E5%B1%95%E6%9D%BF%E5%8E%9F%E7%90%86%E5%9B%BE.PNG&quot; alt&gt;&lt;/p&gt;
     
     </summary>
     
