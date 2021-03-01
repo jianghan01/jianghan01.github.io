@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="baidu-site-verification" content="vLnrqSqoZM">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.12173437.xyz","root":"/","scheme":"Mist","version":"7.7.1","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":true,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+
+
+  <meta name="description" content="Jekyll·利用腾讯云COS为博客添加相册模块个人博客小站刚建站不久，想着除了主题里的功能外再添加上相册模块，于是半搜索半摸索把相册模块搞出来了，最后采用了利用腾讯云对象存储作图床的方案，在国内速度也快，不用上传图片还来修改代码，只负责上传图片就好。我参考了以下博文给hexo静态博客添加动态相册功能（用了他的头图🐶） 实现本模块需要两方面的设置：一是腾讯云对象存储；二是代码层添加相关页面；">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Jekyll·利用腾讯云COS为博客添加相册模块">
+<meta property="og:url" content="https://www.12173437.xyz/2021/03/01/Jekyll%C2%B7%E5%88%A9%E7%94%A8%E8%85%BE%E8%AE%AF%E4%BA%91COS%E4%B8%BA%E5%8D%9A%E5%AE%A2%E6%B7%BB%E5%8A%A0%E7%9B%B8%E5%86%8C%E6%A8%A1%E5%9D%97/index.html">
+<meta property="og:site_name" content="江寒">
+<meta property="og:description" content="Jekyll·利用腾讯云COS为博客添加相册模块个人博客小站刚建站不久，想着除了主题里的功能外再添加上相册模块，于是半搜索半摸索把相册模块搞出来了，最后采用了利用腾讯云对象存储作图床的方案，在国内速度也快，不用上传图片还来修改代码，只负责上传图片就好。我参考了以下博文给hexo静态博客添加动态相册功能（用了他的头图🐶） 实现本模块需要两方面的设置：一是腾讯云对象存储；二是代码层添加相关页面；">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://tuchuang-1251287103.cos.ap-chongqing.myqcloud.com/tuchuang%E8%85%BE%E8%AE%AF%E4%BA%91%E5%AF%B9%E8%B1%A1%E5%AD%98%E5%82%A8.png">
+<meta property="og:image" content="https://tuchuang-1251287103.cos.ap-chongqing.myqcloud.com/tuchuang%E8%85%BE%E8%AE%AF%E4%BA%91%E5%AF%B9%E8%B1%A1%E5%AD%98%E5%82%A81.png">
+<meta property="og:image" content="https://tuchuang-1251287103.cos.ap-chongqing.myqcloud.com/tuchuang%E8%85%BE%E8%AE%AF%E4%BA%91%E5%AF%B9%E8%B1%A1%E5%AD%98%E5%82%A83.png">
+<meta property="og:image" content="https://tuchuang-1251287103.cos.ap-chongqing.myqcloud.com/tuchuang%E8%85%BE%E8%AE%AF%E4%BA%91%E5%AF%B9%E8%B1%A1%E5%AD%98%E5%82%A82.png">
+<meta property="og:image" content="https://tuchuang-1251287103.cos.ap-chongqing.myqcloud.com/tuchuang%E8%85%BE%E8%AE%AF%E4%BA%91%E5%AF%B9%E8%B1%A1%E5%AD%98%E5%82%A84.png">
+<meta property="og:image" content="https://tuchuang-1251287103.cos.ap-chongqing.myqcloud.com/tuchuangJekyll%E9%85%8D%E7%BD%AE.png">
+<meta property="og:image" content="https://tuchuang-1251287103.cos.ap-chongqing.myqcloud.com/tuchuang%E7%9B%B8%E5%86%8C%E9%A1%B5%E9%9D%A2.png">
+<meta property="article:published_time" content="2021-03-01T04:47:00.000Z">
+<meta property="article:modified_time" content="2021-03-01T05:04:48.405Z">
+<meta property="article:author" content="江寒">
+<meta property="article:tag" content="Hexo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tuchuang-1251287103.cos.ap-chongqing.myqcloud.com/tuchuang%E8%85%BE%E8%AE%AF%E4%BA%91%E5%AF%B9%E8%B1%A1%E5%AD%98%E5%82%A8.png">
+
+<link rel="canonical" href="https://www.12173437.xyz/2021/03/01/Jekyll%C2%B7%E5%88%A9%E7%94%A8%E8%85%BE%E8%AE%AF%E4%BA%91COS%E4%B8%BA%E5%8D%9A%E5%AE%A2%E6%B7%BB%E5%8A%A0%E7%9B%B8%E5%86%8C%E6%A8%A1%E5%9D%97/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>Jekyll·利用腾讯云COS为博客添加相册模块 | 江寒</title>
+  
+
+
+  <script pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?f92adca0a17bf0d8a0d29b8f6cb3ea23";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="江寒" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">江寒</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <h1 class="site-subtitle" itemprop="description">我就是我，不一样的鞭炮</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-首页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-相册">
+
+    <a href="/photos/" rel="section"><i class="fa fa-fw fa-camera"></i>相册</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.12173437.xyz/2021/03/01/Jekyll%C2%B7%E5%88%A9%E7%94%A8%E8%85%BE%E8%AE%AF%E4%BA%91COS%E4%B8%BA%E5%8D%9A%E5%AE%A2%E6%B7%BB%E5%8A%A0%E7%9B%B8%E5%86%8C%E6%A8%A1%E5%9D%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="江寒">
+      <meta itemprop="description" content="孤独星球">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="江寒">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          Jekyll·利用腾讯云COS为博客添加相册模块
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-03-01 12:47:00 / 修改时间：13:04:48" itemprop="dateCreated datePublished" datetime="2021-03-01T12:47:00+08:00">2021-03-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Hexo/" itemprop="url" rel="index">
+                    <span itemprop="name">Hexo</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span id="/2021/03/01/Jekyll%C2%B7%E5%88%A9%E7%94%A8%E8%85%BE%E8%AE%AF%E4%BA%91COS%E4%B8%BA%E5%8D%9A%E5%AE%A2%E6%B7%BB%E5%8A%A0%E7%9B%B8%E5%86%8C%E6%A8%A1%E5%9D%97/" class="post-meta-item leancloud_visitors" data-flag-title="Jekyll·利用腾讯云COS为博客添加相册模块" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/03/01/Jekyll%C2%B7%E5%88%A9%E7%94%A8%E8%85%BE%E8%AE%AF%E4%BA%91COS%E4%B8%BA%E5%8D%9A%E5%AE%A2%E6%B7%BB%E5%8A%A0%E7%9B%B8%E5%86%8C%E6%A8%A1%E5%9D%97/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/03/01/Jekyll%C2%B7%E5%88%A9%E7%94%A8%E8%85%BE%E8%AE%AF%E4%BA%91COS%E4%B8%BA%E5%8D%9A%E5%AE%A2%E6%B7%BB%E5%8A%A0%E7%9B%B8%E5%86%8C%E6%A8%A1%E5%9D%97/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>8.2k</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <hr>
+<h2 id="Jekyll·利用腾讯云COS为博客添加相册模块"><a href="#Jekyll·利用腾讯云COS为博客添加相册模块" class="headerlink" title="Jekyll·利用腾讯云COS为博客添加相册模块"></a>Jekyll·利用腾讯云COS为博客添加相册模块</h2><p>个人博客小站刚建站不久，想着除了主题里的功能外再添加上相册模块，于是半搜索半摸索把相册模块搞出来了，最后采用了利用腾讯云对象存储作图床的方案，在国内速度也快，不用上传图片还来修改代码，只负责上传图片就好。我参考了以下博文<span class="exturl" data-url="aHR0cHM6Ly9tZS5pZGVhbGxpLmNvbS9wb3N0LzczYWQ0MTgzLmh0bWw=" title="https://me.idealli.com/post/73ad4183.html">给hexo静态博客添加动态相册功能<i class="fa fa-external-link"></i></span>（用了他的头图🐶）</p>
+<p>实现本模块需要两方面的设置：一是腾讯云对象存储；二是代码层添加相关页面；</p>
+<h3 id="腾讯云部分设置"><a href="#腾讯云部分设置" class="headerlink" title="腾讯云部分设置"></a>腾讯云部分设置</h3><p>腾讯云新用户使用对象存储每月有50G的免费额度，持续6个月。<strong>但是！不包括下行流量等其他消费</strong>，这只是存储额度，每月还是需要花点小钱的，对于个人博客来说花销不会很大。</p>
+<ol>
+<li>登录腾讯云账号后选择菜单云产品-&gt;对象存储</li>
+<li>点击使用，选择存储桶列表然后新建，输入名称，选择地域，其他一切默认就好</li>
+</ol>
+<p>!<img data-src="https://tuchuang-1251287103.cos.ap-chongqing.myqcloud.com/tuchuang%E8%85%BE%E8%AE%AF%E4%BA%91%E5%AF%B9%E8%B1%A1%E5%AD%98%E5%82%A8.png" alt="腾讯云对象存储"></p>
+<p>3.然后在存储桶里上传一些照片，此时复制访问域名到地址栏里看看是否可以访问<strong>（该访问域名代码层需要用到，很重要）</strong></p>
+<p><img data-src="https://tuchuang-1251287103.cos.ap-chongqing.myqcloud.com/tuchuang%E8%85%BE%E8%AE%AF%E4%BA%91%E5%AF%B9%E8%B1%A1%E5%AD%98%E5%82%A81.png" alt="腾讯云对象存储1"></p>
+<p>4.不出意外应该会如下图所示，因为没有设置相关权限，暂时无法直接访问</p>
+<p><img data-src="https://tuchuang-1251287103.cos.ap-chongqing.myqcloud.com/tuchuang%E8%85%BE%E8%AE%AF%E4%BA%91%E5%AF%B9%E8%B1%A1%E5%AD%98%E5%82%A83.png" alt="腾讯云对象存储3"></p>
+<p>5.点击权限管理，然后如图所示选择添加即可，完成后再进行第三步操作应该没问题啦</p>
+<p><img data-src="https://tuchuang-1251287103.cos.ap-chongqing.myqcloud.com/tuchuang%E8%85%BE%E8%AE%AF%E4%BA%91%E5%AF%B9%E8%B1%A1%E5%AD%98%E5%82%A82.png" alt="腾讯云对象存储2"></p>
+<p>6.最后再开启防盗链，这样别人就不能偷偷用你流量和图片还不用付钱啦，选择基础配置-&gt;防盗链设置进行编辑，如下图所示，重点是Referer，即只有这里填写的IP地址或域名才能使用，其他人无法访问</p>
+<p><img data-src="https://tuchuang-1251287103.cos.ap-chongqing.myqcloud.com/tuchuang%E8%85%BE%E8%AE%AF%E4%BA%91%E5%AF%B9%E8%B1%A1%E5%AD%98%E5%82%A84.png" alt="腾讯云对象存储4"></p>
+<h4 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h4><blockquote>
+<ul>
+<li>上传照片前，先在存储桶中建立一个文件夹，也就是你的相册名字，当然你也可以新建多个文件夹。</li>
+<li>但是有一点需要需要注意的是，<strong>不能直接上传一个文件夹</strong>，那样会出bug，见完文件夹后往里面上传照片，文件夹里面不能再新建文件夹了（除非你自己改造下面的相应代码）</li>
+<li>照片一定放在一个文件夹中，有文件夹又有单独的照片，相册是不会显示的（跟代码有关）</li>
+</ul>
+</blockquote>
+<h3 id="Jekyll配置"><a href="#Jekyll配置" class="headerlink" title="Jekyll配置"></a>Jekyll配置</h3><ol>
+<li><p>在项目里添加一个相册目录album，然后添加index.html（根据代码层次可能略有差异，不知道的话先去了解各个模块的功能吧）。</p>
+</li>
+<li><p>然后<code>_config.yml</code>配置文件中的菜单栏里也加上相册模块</p>
+<p><img data-src="https://tuchuang-1251287103.cos.ap-chongqing.myqcloud.com/tuchuangJekyll%E9%85%8D%E7%BD%AE.png" alt="Jekyll配置"></p>
+</li>
+</ol>
+<p>3.在相册页面的index.html添加如下代码，其中JS代码是重点，页面布局可以看个人喜好啦：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">style</span> <span class="attr">type</span>=<span class="string">"text/css"</span>&gt;</span></span><br><span class="line"><span class="css">			<span class="selector-class">.main</span> &#123;</span></span><br><span class="line">			padding-bottom: 150px;</span><br><span class="line">			margin-top: 0px;</span><br><span class="line">			&#125;</span><br><span class="line">			body &#123;</span><br><span class="line">				background-size: 100%;</span><br><span class="line"><span class="css">				<span class="comment">/*background-position: top left;*/</span></span></span><br><span class="line">			&#125;</span><br><span class="line"><span class="css">			<span class="selector-class">.imgbox</span>&#123;</span></span><br><span class="line">			 width: 100%;</span><br><span class="line">			 overflow: hidden;</span><br><span class="line">			&#125;</span><br><span class="line"><span class="css">			<span class="selector-class">.box</span>&#123;</span></span><br><span class="line">				visibility: visible;</span><br><span class="line">				overflow: auto; </span><br><span class="line">				zoom: 1;</span><br><span class="line">			&#125;</span><br><span class="line"><span class="css">			<span class="selector-class">.box</span> <span class="selector-tag">li</span>&#123;</span></span><br><span class="line">			float: left;</span><br><span class="line">			width: 25%;</span><br><span class="line">			position: relative;</span><br><span class="line">			overflow: hidden;</span><br><span class="line">			text-align: center;</span><br><span class="line">			list-style: none;</span><br><span class="line">			margin: 0;</span><br><span class="line"><span class="css">			<span class="comment">/*display: inline;*/</span></span></span><br><span class="line">			padding: 0;</span><br><span class="line">			&#125;</span><br><span class="line"><span class="css">			<span class="selector-class">.box</span> <span class="selector-tag">li</span> <span class="selector-tag">span</span>&#123;</span></span><br><span class="line">			display: block;</span><br><span class="line">			font-size: 16px;</span><br><span class="line">			font-weight: 600;</span><br><span class="line">			font-family: fantasy;</span><br><span class="line">			-webkit-box-sizing: border-box;</span><br><span class="line">			box-sizing: border-box;</span><br><span class="line">			&#125;</span><br><span class="line"><span class="css">			<span class="selector-tag">img</span><span class="selector-class">.imgitem</span>&#123;</span></span><br><span class="line">				padding: unset;</span><br><span class="line">				padding: unset;</span><br><span class="line">				border: unset;</span><br><span class="line">				position: relative;</span><br><span class="line">				padding: 0px;</span><br><span class="line">				height: auto;</span><br><span class="line">				width: 100%;</span><br><span class="line">			&#125;</span><br><span class="line"><span class="css">		<span class="selector-class">.v</span>&#123;</span></span><br><span class="line">			width: 95%;</span><br><span class="line">			padding-top: 40px;</span><br><span class="line">    		margin: 0 auto;</span><br><span class="line">		&#125;</span><br><span class="line"><span class="css">		<span class="selector-tag">div</span><span class="selector-id">#posts</span><span class="selector-class">.posts-expand</span> &#123;</span></span><br><span class="line">			border: unset;</span><br><span class="line">			padding: unset;</span><br><span class="line">			margin-bottom: 10px;</span><br><span class="line">		&#125;</span><br><span class="line"><span class="css">		<span class="selector-class">.posts-expand</span> <span class="selector-class">.post-body</span> <span class="selector-tag">img</span>&#123;</span></span><br><span class="line">			padding: 12px !important;</span><br><span class="line">		&#125;</span><br><span class="line"><span class="css">		<span class="selector-class">.box</span> <span class="selector-tag">p</span>&#123;</span></span><br><span class="line">			display: block;</span><br><span class="line">			font-size: 12px;</span><br><span class="line">			font-family: 'SwisMedium';</span><br><span class="line">			-webkit-box-sizing: border-box;</span><br><span class="line">			box-sizing: border-box;</span><br><span class="line">			text-align: center;</span><br><span class="line">		&#125;</span><br><span class="line"><span class="css">		<span class="selector-class">.box</span> <span class="selector-tag">span</span> <span class="selector-tag">strong</span>&#123;</span></span><br><span class="line"><span class="css">			<span class="selector-tag">background</span>: <span class="selector-tag">rgba</span>(0,0,0,0<span class="selector-class">.4</span>);</span></span><br><span class="line">			padding: 20px;</span><br><span class="line">		&#125;</span><br><span class="line"><span class="css">		<span class="selector-class">.posts-expand</span> <span class="selector-class">.post-title</span> &#123;</span></span><br><span class="line">			display: none;</span><br><span class="line">		&#125;</span><br><span class="line"><span class="css">		<span class="selector-class">.title</span>&#123;</span></span><br><span class="line">			width: 40%;</span><br><span class="line">			margin: 0 auto;</span><br><span class="line">			text-align: center;</span><br><span class="line">		&#125;</span><br><span class="line"><span class="css">		<span class="selector-class">.title</span> <span class="selector-tag">h2</span>&#123;</span></span><br><span class="line">			border: double;</span><br><span class="line">		    color: white;</span><br><span class="line">		    width: 70%;</span><br><span class="line">		    margin: 0 auto;</span><br><span class="line">		    background-color: tomato;</span><br><span class="line">		&#125;</span><br><span class="line"><span class="css">		<span class="selector-class">.title</span> <span class="selector-tag">hr</span>&#123;</span></span><br><span class="line"><span class="css">			<span class="selector-tag">height</span><span class="selector-pseudo">:2px</span>;</span></span><br><span class="line">		&#125;</span><br><span class="line"><span class="css">		<span class="selector-class">.btn-more-posts</span>&#123;</span></span><br><span class="line">			display: inline-block;</span><br><span class="line">			vertical-align: middle;</span><br><span class="line">			font: 85px/250px 'ChaletComprimeMilanSixty';</span><br><span class="line"><span class="css">			<span class="selector-tag">color</span>: <span class="selector-id">#000</span>;</span></span><br><span class="line">			width: 100%;</span><br><span class="line">			text-align: center;</span><br><span class="line">			border: unset;</span><br><span class="line">			height: 400px;</span><br><span class="line"><span class="css">			<span class="selector-tag">background-color</span>: <span class="selector-id">#121212</span>;</span></span><br><span class="line">			-webkit-box-sizing: border-box;</span><br><span class="line">			box-sizing: border-box;</span><br><span class="line">		&#125;</span><br><span class="line"><span class="css">		<span class="keyword">@media</span> (<span class="attribute">max-width:</span> <span class="number">767px</span>)&#123;</span></span><br><span class="line"><span class="css">			<span class="selector-class">.box</span> <span class="selector-tag">li</span> &#123;</span></span><br><span class="line">			width: 100%;</span><br><span class="line">		&#125;</span><br><span class="line"><span class="css">		<span class="selector-class">.posts-expand</span> <span class="selector-class">.post-body</span> <span class="selector-tag">img</span>&#123;</span></span><br><span class="line">			padding: 0px !important;</span><br><span class="line">		&#125;</span><br><span class="line"><span class="css">		<span class="selector-class">.box</span> <span class="selector-tag">span</span> &#123;</span></span><br><span class="line">			border-right: unset;</span><br><span class="line">			font-size: 17px;</span><br><span class="line">		&#125;</span><br><span class="line"><span class="css">		<span class="selector-class">.box</span> <span class="selector-tag">p</span>&#123;</span></span><br><span class="line">			border-right: unset;</span><br><span class="line">			font-size: 12px;</span><br><span class="line">   		  </span><br><span class="line">		&#125;</span><br><span class="line"><span class="css">		<span class="selector-class">.posts-expand</span> &#123;</span></span><br><span class="line">			margin: unset;</span><br><span class="line">		&#125;</span><br><span class="line"><span class="css">			<span class="selector-tag">div</span><span class="selector-id">#comments</span><span class="selector-class">.comments</span><span class="selector-class">.v</span> &#123;</span></span><br><span class="line">			width: 96%;</span><br><span class="line">			padding-top: 50px;</span><br><span class="line">		&#125;</span><br><span class="line">		&#125;</span><br><span class="line"><span class="css">		<span class="keyword">@media</span> (<span class="attribute">min-width:</span> <span class="number">1600px</span>)&#123;</span></span><br><span class="line"><span class="css">			<span class="selector-class">.container</span> <span class="selector-class">.main-inner</span>&#123;</span></span><br><span class="line">				width: 100%;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line"><span class="css">		<span class="selector-class">.footer</span>&#123;</span></span><br><span class="line"><span class="css">			<span class="selector-tag">background-color</span>: <span class="selector-id">#121212</span> !<span class="selector-tag">important</span>;</span></span><br><span class="line">		&#125;</span><br><span class="line"><span class="css">		<span class="selector-class">.v</span> <span class="selector-class">.vwrap</span> <span class="selector-class">.vmark</span> <span class="selector-class">.valert</span> <span class="selector-class">.vcode</span> &#123;</span></span><br><span class="line"><span class="css">			<span class="selector-tag">background</span>: <span class="selector-id">#00050b</span> !<span class="selector-tag">important</span>;</span></span><br><span class="line">		&#125;</span><br><span class="line"><span class="css">		<span class="selector-class">.nav</span>&gt;<span class="selector-tag">li</span> &#123;</span></span><br><span class="line">			float: left;</span><br><span class="line">		&#125;</span><br><span class="line"><span class="css">		<span class="selector-class">.imgbox</span> <span class="selector-tag">img</span>&#123;</span></span><br><span class="line">			width: 95%;</span><br><span class="line">		&#125;</span><br><span class="line"><span class="css">		<span class="selector-class">.container-fluid</span> <span class="selector-tag">a</span>&#123;</span></span><br><span class="line">			border-bottom-style: none;</span><br><span class="line"><span class="css">			<span class="selector-tag">color</span>: <span class="selector-id">#555</span>;</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">nav</span> <span class="attr">class</span>=<span class="string">"navbar navbar-default"</span> <span class="attr">role</span>=<span class="string">"navigation"</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"container-fluid"</span>&gt;</span> </span><br><span class="line">		<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"navbar-header"</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">button</span> <span class="attr">type</span>=<span class="string">"button"</span> <span class="attr">class</span>=<span class="string">"navbar-toggle"</span> <span class="attr">data-toggle</span>=<span class="string">"collapse"</span></span></span><br><span class="line"><span class="tag">					<span class="attr">data-target</span>=<span class="string">"#example-navbar-collapse"</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">span</span> <span class="attr">class</span>=<span class="string">"sr-only"</span>&gt;</span>切换导航<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">span</span> <span class="attr">class</span>=<span class="string">"icon-bar"</span>&gt;</span><span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">span</span> <span class="attr">class</span>=<span class="string">"icon-bar"</span>&gt;</span><span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">span</span> <span class="attr">class</span>=<span class="string">"icon-bar"</span>&gt;</span><span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">"navbar-brand"</span> <span class="attr">href</span>=<span class="string">"https://jiangsang.github.io/"</span>&gt;</span>Jianger's Blog<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"collapse navbar-collapse"</span> <span class="attr">id</span>=<span class="string">"example-navbar-collapse"</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">ul</span> <span class="attr">class</span>=<span class="string">"nav navbar-nav"</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">li</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"https://jiangsang.github.io/"</span>&gt;</span><span class="tag">&lt;<span class="name">i</span> <span class="attr">class</span>=<span class="string">"menu-item-icon fa fa-fw fa-home"</span>&gt;</span><span class="tag">&lt;/<span class="name">i</span>&gt;</span>首页<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">li</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"https://jiangsang.github.io/about"</span>&gt;</span><span class="tag">&lt;<span class="name">i</span> <span class="attr">class</span>=<span class="string">"menu-item-icon fa fa-fw fa-user"</span>&gt;</span><span class="tag">&lt;/<span class="name">i</span>&gt;</span>关于<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">li</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"https://jiangsang.github.io/archives/"</span>&gt;</span><span class="tag">&lt;<span class="name">i</span> <span class="attr">class</span>=<span class="string">"menu-item-icon fa fa-fw fa-archive"</span>&gt;</span><span class="tag">&lt;/<span class="name">i</span>&gt;</span>归档<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">li</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"https://jiangsang.github.io/tags/"</span>&gt;</span><span class="tag">&lt;<span class="name">i</span> <span class="attr">class</span>=<span class="string">"menu-item-icon fa fa-fw fa-tags"</span>&gt;</span><span class="tag">&lt;/<span class="name">i</span>&gt;</span>标签<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">li</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"https://jiangsang.github.io/life/"</span>&gt;</span><span class="tag">&lt;<span class="name">i</span> <span class="attr">class</span>=<span class="string">"menu-item-icon fa fa-fw fa-apple"</span>&gt;</span><span class="tag">&lt;/<span class="name">i</span>&gt;</span>生活<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">li</span> <span class="attr">class</span>=<span class="string">"active"</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"https://jiangsang.github.io/life/"</span>&gt;</span><span class="tag">&lt;<span class="name">i</span> <span class="attr">class</span>=<span class="string">"menu-item-icon fa fa-fw fa-camera-retro"</span>&gt;</span><span class="tag">&lt;/<span class="name">i</span>&gt;</span>相册<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">nav</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"box"</span> <span class="attr">class</span>=<span class="string">"box"</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span>&gt;</span></span><br><span class="line"><span class="actionscript">		<span class="function"><span class="keyword">function</span> <span class="title">loadXMLDoc</span><span class="params">(xmlUrl)</span> </span></span></span><br><span class="line">		&#123;</span><br><span class="line"><span class="actionscript">			<span class="keyword">try</span> <span class="comment">//Internet Explorer</span></span></span><br><span class="line">			&#123;</span><br><span class="line"><span class="actionscript">				xmlDoc=<span class="keyword">new</span> ActiveXObject(<span class="string">"Microsoft.XMLDOM"</span>);</span></span><br><span class="line">			&#125;</span><br><span class="line"><span class="actionscript">			<span class="keyword">catch</span>(e)</span></span><br><span class="line">			&#123;</span><br><span class="line"><span class="actionscript">			  <span class="keyword">try</span> <span class="comment">//Firefox, Mozilla, Opera, etc.</span></span></span><br><span class="line">				&#123;</span><br><span class="line"><span class="javascript">				  xmlDoc=<span class="built_in">document</span>.implementation.createDocument(<span class="string">""</span>,<span class="string">""</span>,<span class="literal">null</span>);</span></span><br><span class="line">				&#125;</span><br><span class="line"><span class="actionscript">			  <span class="keyword">catch</span>(e) &#123;alert(e.message)&#125;</span></span><br><span class="line">			&#125;</span><br><span class="line">   			</span><br><span class="line"><span class="actionscript">			<span class="keyword">try</span> </span></span><br><span class="line">			&#123;</span><br><span class="line"><span class="actionscript">				  xmlDoc.async=<span class="literal">false</span>;</span></span><br><span class="line">				  xmlDoc.load(xmlUrl);</span><br><span class="line">			&#125;</span><br><span class="line"><span class="actionscript">			<span class="keyword">catch</span>(e) &#123;</span></span><br><span class="line"><span class="actionscript">				<span class="keyword">try</span> <span class="comment">//Google Chrome  </span></span></span><br><span class="line">				  &#123;  </span><br><span class="line"><span class="actionscript">					<span class="keyword">var</span> chromeXml = <span class="keyword">new</span> XMLHttpRequest();</span></span><br><span class="line"><span class="actionscript">					chromeXml.open(<span class="string">"GET"</span>, xmlUrl, <span class="literal">false</span>);</span></span><br><span class="line"><span class="actionscript">					chromeXml.send(<span class="literal">null</span>);</span></span><br><span class="line">					xmlDoc = chromeXml.responseXML.documentElement; 				</span><br><span class="line"><span class="actionscript">					<span class="comment">//alert(xmlDoc.childNodes[0].nodeName);</span></span></span><br><span class="line"><span class="actionscript">					<span class="comment">//return xmlDoc;    </span></span></span><br><span class="line">				  &#125;  </span><br><span class="line"><span class="actionscript">				  <span class="keyword">catch</span>(e)  </span></span><br><span class="line">				  &#123;  </span><br><span class="line">					  alert(e.message)  </span><br><span class="line">				  &#125;  		  	</span><br><span class="line">			&#125;</span><br><span class="line"><span class="actionscript">			<span class="keyword">return</span> xmlDoc; </span></span><br><span class="line">		&#125;</span><br><span class="line"><span class="actionscript">		<span class="comment">//xmllink就是你的相册存储桶的访问域名</span></span></span><br><span class="line"><span class="actionscript">		xmllink=<span class="string">"https://album-1300776923.cos.ap-shanghai.myqcloud.com/"</span>;</span></span><br><span class="line">		xmlDoc=loadXMLDoc(xmllink);</span><br><span class="line"><span class="actionscript">		<span class="keyword">var</span> urls=xmlDoc.getElementsByTagName(<span class="string">'Key'</span>);</span></span><br><span class="line"><span class="actionscript">		<span class="keyword">var</span> date=xmlDoc.getElementsByTagName(<span class="string">'LastModified'</span>);</span></span><br><span class="line"><span class="actionscript">		<span class="keyword">var</span> showNum=<span class="number">12</span>; <span class="comment">//每个相册一次展示多少照片</span></span></span><br><span class="line"><span class="javascript">		<span class="keyword">if</span> ((<span class="built_in">window</span>.innerWidth)&gt;<span class="number">1200</span>) &#123;wid=(<span class="built_in">window</span>.innerWidth*<span class="number">3</span>)/<span class="number">18</span>;&#125;</span></span><br><span class="line"><span class="javascript">		<span class="keyword">var</span> box=<span class="built_in">document</span>.getElementById(<span class="string">'box'</span>);</span></span><br><span class="line"><span class="actionscript">		<span class="keyword">var</span> i=<span class="number">0</span>;</span></span><br><span class="line"><span class="javascript">		<span class="keyword">var</span> content=<span class="keyword">new</span> <span class="built_in">Array</span>();</span></span><br><span class="line"><span class="actionscript">		<span class="keyword">var</span> tmp=<span class="number">0</span>;</span></span><br><span class="line"><span class="actionscript">		<span class="keyword">var</span> kkk=<span class="number">-1</span>;</span></span><br><span class="line"><span class="actionscript">		<span class="keyword">for</span> (<span class="keyword">var</span> t = <span class="number">0</span>; t &lt; urls.length ; t++) &#123;</span></span><br><span class="line"><span class="actionscript">			<span class="keyword">var</span> bucket=urls[t].innerHTML;</span></span><br><span class="line"><span class="actionscript">			<span class="keyword">var</span> length=bucket.indexOf(<span class="string">'/'</span>);</span></span><br><span class="line">			if(length===bucket.length-1)&#123;</span><br><span class="line">				kkk++;</span><br><span class="line"><span class="javascript">				content[kkk]=<span class="keyword">new</span> <span class="built_in">Array</span>();</span></span><br><span class="line"><span class="actionscript">				content[kkk][<span class="number">0</span>]=&#123;<span class="string">'url'</span>:bucket,<span class="string">'date'</span>:date[t].innerHTML.substring(<span class="number">0</span>,<span class="number">10</span>)&#125;;</span></span><br><span class="line">				tmp=1;</span><br><span class="line">			&#125;</span><br><span class="line"><span class="actionscript">			<span class="keyword">else</span> &#123;</span></span><br><span class="line"><span class="actionscript">				content[kkk][tmp++]=&#123;<span class="string">'url'</span>:bucket.substring(length+<span class="number">1</span>),<span class="string">'date'</span>:date[t].innerHTML.substring(<span class="number">0</span>,<span class="number">10</span>)&#125;;</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line"><span class="actionscript">		<span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; content.length; i++) &#123;</span></span><br><span class="line"><span class="javascript">			<span class="keyword">var</span> conBox=<span class="built_in">document</span>.createElement(<span class="string">"div"</span>);</span></span><br><span class="line"><span class="actionscript">			conBox.id=<span class="string">'conBox'</span>+i;</span></span><br><span class="line"><span class="actionscript">			conBox.style=<span class="string">'display: inline-block;'</span>;</span></span><br><span class="line">			box.appendChild(conBox);</span><br><span class="line"><span class="javascript">			<span class="keyword">var</span> item=<span class="built_in">document</span>.createElement(<span class="string">"div"</span>);</span></span><br><span class="line"><span class="actionscript">			<span class="keyword">var</span> title=content[i][<span class="number">0</span>].url;</span></span><br><span class="line"><span class="handlebars"><span class="xml">			item.innerHTML="<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">title</span> <span class="attr">style</span>=<span class="string">margin-top:20px;</span>&gt;</span><span class="tag">&lt;<span class="name">h2</span>&gt;</span>"+title.substring(0,title.length-1)+"<span class="tag">&lt;/<span class="name">h2</span>&gt;</span><span class="tag">&lt;<span class="name">hr</span>/&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span>";</span></span></span><br><span class="line">			conBox.appendChild(item);</span><br><span class="line"><span class="actionscript">			<span class="keyword">for</span> (<span class="keyword">var</span> j = <span class="number">1</span>; j &lt; content[i].length &amp;&amp; j &lt; showNum+<span class="number">1</span>; j++) &#123;</span></span><br><span class="line"><span class="actionscript">				<span class="keyword">var</span> con=content[i][j].url;</span></span><br><span class="line"><span class="javascript">				<span class="keyword">var</span> item=<span class="built_in">document</span>.createElement(<span class="string">"li"</span>);</span></span><br><span class="line"><span class="handlebars"><span class="xml">				item.innerHTML="<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">imgbox</span> <span class="attr">id</span>=<span class="string">imgbox</span>&gt;</span><span class="tag">&lt;<span class="name">img</span> <span class="attr">class</span>=<span class="string">imgitem</span> <span class="attr">src</span>=<span class="string">"+xmllink+'/'+title+con+"</span> <span class="attr">alt</span>=<span class="string">"+con+"</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span><span class="tag">&lt;<span class="name">span</span>&gt;</span>"+con.substring(0,con.length-4)+"<span class="tag">&lt;/<span class="name">span</span>&gt;</span><span class="tag">&lt;<span class="name">p</span>&gt;</span>上传于"+content[i][j].date+"<span class="tag">&lt;/<span class="name">p</span>&gt;</span>";</span></span></span><br><span class="line">				conBox.appendChild(item);</span><br><span class="line">			&#125;</span><br><span class="line">			if(content[i].length &gt; showNum)&#123;</span><br><span class="line"><span class="javascript">				<span class="keyword">var</span> moreItem=<span class="built_in">document</span>.createElement(<span class="string">"button"</span>);</span></span><br><span class="line"><span class="actionscript">				moreItem.className=<span class="string">"btn-more-posts"</span>;</span></span><br><span class="line"><span class="actionscript">				moreItem.id=<span class="string">"more"</span>+i;</span></span><br><span class="line">				moreItem.value=showNum+1;</span><br><span class="line"><span class="javascript">				<span class="keyword">let</span> cur=i;</span></span><br><span class="line"><span class="actionscript">				moreItem.onclick= <span class="function"><span class="keyword">function</span> <span class="params">()</span></span>&#123;</span></span><br><span class="line"><span class="actionscript">					moreClick(<span class="keyword">this</span>,cur,content[cur],content[cur][<span class="number">0</span>].url);</span></span><br><span class="line">				&#125;</span><br><span class="line"><span class="handlebars"><span class="xml">				moreItem.innerHTML="<span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">display:inline;</span>&gt;</span><span class="tag">&lt;<span class="name">strong</span> <span class="attr">style</span>=<span class="string">color:#f0f3f6;</span>&gt;</span>加载更多<span class="tag">&lt;/<span class="name">strong</span>&gt;</span><span class="tag">&lt;/<span class="name">span</span>&gt;</span>";</span></span></span><br><span class="line">				conBox.appendChild(moreItem);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br></pre></td></tr></table></figure>
+
+<p>再往cos存储桶里上传照片，就可以了！访问后效果如下</p>
+<p><img data-src="https://tuchuang-1251287103.cos.ap-chongqing.myqcloud.com/tuchuang%E7%9B%B8%E5%86%8C%E9%A1%B5%E9%9D%A2.png" alt="相册页面"></p>
+<h3 id="相册布局界面"><a href="#相册布局界面" class="headerlink" title="相册布局界面"></a>相册布局界面</h3><blockquote>
+<p>主题有默认布局，如果不想要在默认布局的基础上放置内容页面需要在layout文件下添加布局代码album.html，然后album目录下的index.html需要添加<code>layout:album</code>代码，意思便是使用album布局喽</p>
+<p>这个很重要，每个人喜好不同，花点时间打造成自己喜欢的相册空间吧！</p>
+</blockquote>
+<p>本文转载自jianger的<span class="exturl" data-url="aHR0cHM6Ly9qaWFuZ2VyLnNwYWNlL3Rha2UtYWR2YW50YWdlLW9mLXRlbmNlbnQtY29zLXRvLWFwcGVuZC1hbGJ1bS1tb2R1bGUtZm9yLWJsb2ctd2l0aC1qZWt5bGwv" title="https://jianger.space/take-advantage-of-tencent-cos-to-append-album-module-for-blog-with-jekyll/">Jekyll·利用腾讯云COS为博客添加相册模块<i class="fa fa-external-link"></i></span>，采用 <span class="exturl" data-url="aHR0cHM6Ly9jcmVhdGl2ZWNvbW1vbnMub3JnL2xpY2Vuc2VzL2J5LW5jLXNhLzMuMC8=" title="https://creativecommons.org/licenses/by-nc-sa/3.0/">CC BY-NC-SA 3.0<i class="fa fa-external-link"></i></span> 许可协议</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat.png" alt="江寒 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="江寒 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>江寒
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://www.12173437.xyz/2021/03/01/Jekyll%C2%B7%E5%88%A9%E7%94%A8%E8%85%BE%E8%AE%AF%E4%BA%91COS%E4%B8%BA%E5%8D%9A%E5%AE%A2%E6%B7%BB%E5%8A%A0%E7%9B%B8%E5%86%8C%E6%A8%A1%E5%9D%97/" title="Jekyll·利用腾讯云COS为博客添加相册模块">https://www.12173437.xyz/2021/03/01/Jekyll·利用腾讯云COS为博客添加相册模块/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <span class="exturl" data-url="aHR0cHM6Ly9jcmVhdGl2ZWNvbW1vbnMub3JnL3B1YmxpY2RvbWFpbi96ZXJvLzEuMC96aC1DTg=="><i class="fa fa-fw fa-creative-commons"></i>ZERO</span> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+            <div class="social-item">
+              <a target="_blank" class="social-link" href="/atom.xml">
+                <span class="icon">
+                  <i class="fa fa-rss"></i>
+                </span>
+
+                <span class="label">RSS</span>
+              </a>
+            </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Hexo/" rel="tag"># Hexo</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/05/12/%E5%9F%BA%E4%BA%8Eesp8266%E7%9A%84nodemcu%E6%A8%A1%E5%9D%97%E7%9A%84%E6%89%A9%E5%B1%95%E6%9D%BF%E8%AE%BE%E8%AE%A1/" rel="prev" title="基于esp8266的nodemcu模块的扩展板设计">
+      <i class="fa fa-chevron-left"></i> 基于esp8266的nodemcu模块的扩展板设计
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Jekyll·利用腾讯云COS为博客添加相册模块"><span class="nav-number">1.</span> <span class="nav-text">Jekyll·利用腾讯云COS为博客添加相册模块</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#腾讯云部分设置"><span class="nav-number">1.1.</span> <span class="nav-text">腾讯云部分设置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#注意事项"><span class="nav-number">1.1.1.</span> <span class="nav-text">注意事项</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Jekyll配置"><span class="nav-number">1.2.</span> <span class="nav-text">Jekyll配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#相册布局界面"><span class="nav-number">1.3.</span> <span class="nav-text">相册布局界面</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="江寒"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">江寒</p>
+  <div class="site-description" itemprop="description">孤独星球</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRlZS5jb20vamlhbmdoYW4wMQ==" title="Gitee → https:&#x2F;&#x2F;gitee.com&#x2F;jianghan01"><i class="fa fa-fw fa-gitee"></i>Gitee</span>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/jianghankeji@gmail.com" title="E-Mail → jianghankeji@gmail.com"><i class="fa fa-fw fa-gmeal"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <span class="exturl cc-opacity" data-url="aHR0cHM6Ly9jcmVhdGl2ZWNvbW1vbnMub3JnL3B1YmxpY2RvbWFpbi96ZXJvLzEuMC96aC1DTg=="><img src="/images/cc-zero.svg" alt="Creative Commons"></span>
+  </div>
+
+
+
+      </div>
+      
+
+<iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=298 height=52 src="//music.163.com/outchain/player?type=2&id=521415465&auto=1&height=32"></iframe>
+      
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2019 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-江寒"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">江寒</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">13k</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+  <script pjax>
+  function leancloudSelector(url) {
+    url = encodeURI(url);
+    return document.getElementById(url).querySelector('.leancloud-visitors-count');
+  }
+  if (CONFIG.page.isPost) {
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.getAttribute('id'));
+      var title = visitors.getAttribute('data-flag-title');
+
+      Counter('get', `/classes/Counter?where=${JSON.stringify({ url })}`)
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .then(response => response.json())
+              .then(() => {
+                leancloudSelector(url).innerText = counter.time + 1;
+              })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              })
+          } else {
+              leancloudSelector(url).innerText = 'Counter not initialized! More info at console err msg.';
+              console.error('ATTENTION! LeanCloud counter has security bug, see how to solve it here: https://github.com/theme-next/hexo-leancloud-counter-security. \n However, you can still use LeanCloud without security, by setting `security` option to `false`.');
+            
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+  } else {
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.getAttribute('id'));
+      });
+
+      Counter('get', `/classes/Counter?where=${JSON.stringify({ url: { '$in': entries } })}`)
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length === 0) {
+            document.querySelectorAll('.leancloud_visitors .leancloud-visitors-count').forEach(element => {
+              element.innerText = 0;
+            });
+            return;
+          }
+          for (let item of results) {
+            let { url, time } = item;
+            leancloudSelector(url).innerText = time;
+          }
+          for (let url of entries) {
+            var element = leancloudSelector(url);
+            if (element.innerText == '') {
+              element.innerText = 0;
+            }
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+  }
+
+  fetch('https://app-router.leancloud.cn/2/route?appId=7cdJSthizQP3C86wPkq4nIE2-gzGzoHsz')
+    .then(response => response.json())
+    .then(({ api_server }) => {
+      var Counter = (method, url, data) => {
+        return fetch(`https://${api_server}/1.1${url}`, {
+          method: method,
+          headers: {
+            'X-LC-Id'     : '7cdJSthizQP3C86wPkq4nIE2-gzGzoHsz',
+            'X-LC-Key'    : 'a3S5u1xFIL85fQorE68qK6ca',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='140,150,110' opacity='0.5' zIndex='-1' count='150' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script size="300" alpha="0.6" zIndex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.getAttribute('pjax') !== null) {
+      script.setAttribute('pjax', '');
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script pjax>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script pjax>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'dark',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+    <div id="pjax">
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : '7cdJSthizQP3C86wPkq4nIE2-gzGzoHsz',
+      appKey     : 'a3S5u1xFIL85fQorE68qK6ca',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+    </div>
+
+  
+   <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;" ></canvas> 
+   <script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script> 
+   <script type="text/javascript" src="/js/src/fireworks.js"></script>
+   
+   <script type="text/javascript" src="https://unpkg.com/minigrid@3.1.1/dist/minigrid.min.js"></script>
+<link rel="stylesheet" href="/photos/photos.css">
+<script type="text/javascript" src="/photos/photo.js"></script>
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/miku.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body>
+</html>

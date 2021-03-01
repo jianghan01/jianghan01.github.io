@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.12173437.xyz/"/>
-  <updated>2021-02-23T17:06:13.165Z</updated>
+  <updated>2021-03-01T05:04:48.405Z</updated>
   <id>https://www.12173437.xyz/</id>
   
   <author>
@@ -15,6 +15,37 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Jekyll·利用腾讯云COS为博客添加相册模块</title>
+    <link href="https://www.12173437.xyz/2021/03/01/Jekyll%C2%B7%E5%88%A9%E7%94%A8%E8%85%BE%E8%AE%AF%E4%BA%91COS%E4%B8%BA%E5%8D%9A%E5%AE%A2%E6%B7%BB%E5%8A%A0%E7%9B%B8%E5%86%8C%E6%A8%A1%E5%9D%97/"/>
+    <id>https://www.12173437.xyz/2021/03/01/Jekyll%C2%B7%E5%88%A9%E7%94%A8%E8%85%BE%E8%AE%AF%E4%BA%91COS%E4%B8%BA%E5%8D%9A%E5%AE%A2%E6%B7%BB%E5%8A%A0%E7%9B%B8%E5%86%8C%E6%A8%A1%E5%9D%97/</id>
+    <published>2021-03-01T04:47:00.000Z</published>
+    <updated>2021-03-01T05:04:48.405Z</updated>
+    
+    <summary type="html">
+    
+      &lt;hr&gt;
+&lt;h2 id=&quot;Jekyll·利用腾讯云COS为博客添加相册模块&quot;&gt;&lt;a href=&quot;#Jekyll·利用腾讯云COS为博客添加相册模块&quot; class=&quot;headerlink&quot; title=&quot;Jekyll·利用腾讯云COS为博客添加相册模块&quot;&gt;&lt;/a&gt;Jekyll·利用腾讯云COS为博客添加相册模块&lt;/h2&gt;&lt;p&gt;个人博客小站刚建站不久，想着除了主题里的功能外再添加上相册模块，于是半搜索半摸索把相册模块搞出来了，最后采用了利用腾讯云对象存储作图床的方案，在国内速度也快，不用上传图片还来修改代码，只负责上传图片就好。我参考了以下博文&lt;span class=&quot;exturl&quot; data-url=&quot;aHR0cHM6Ly9tZS5pZGVhbGxpLmNvbS9wb3N0LzczYWQ0MTgzLmh0bWw=&quot; title=&quot;https://me.idealli.com/post/73ad4183.html&quot;&gt;给hexo静态博客添加动态相册功能&lt;i class=&quot;fa fa-external-link&quot;&gt;&lt;/i&gt;&lt;/span&gt;（用了他的头图🐶）&lt;/p&gt;
+&lt;p&gt;实现本模块需要两方面的设置：一是腾讯云对象存储；二是代码层添加相关页面；&lt;/p&gt;
+&lt;h3 id=&quot;腾讯云部分设置&quot;&gt;&lt;a href=&quot;#腾讯云部分设置&quot; class=&quot;headerlink&quot; title=&quot;腾讯云部分设置&quot;&gt;&lt;/a&gt;腾讯云部分设置&lt;/h3&gt;&lt;p&gt;腾讯云新用户使用对象存储每月有50G的免费额度，持续6个月。&lt;strong&gt;但是！不包括下行流量等其他消费&lt;/strong&gt;，这只是存储额度，每月还是需要花点小钱的，对于个人博客来说花销不会很大。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;登录腾讯云账号后选择菜单云产品-&amp;gt;对象存储&lt;/li&gt;
+&lt;li&gt;点击使用，选择存储桶列表然后新建，输入名称，选择地域，其他一切默认就好&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;!&lt;img data-src=&quot;https://tuchuang-1251287103.cos.ap-chongqing.myqcloud.com/tuchuang%E8%85%BE%E8%AE%AF%E4%BA%91%E5%AF%B9%E8%B1%A1%E5%AD%98%E5%82%A8.png&quot; alt=&quot;腾讯云对象存储&quot;&gt;&lt;/p&gt;
+&lt;p&gt;3.然后在存储桶里上传一些照片，此时复制访问域名到地址栏里看看是否可以访问&lt;strong&gt;（该访问域名代码层需要用到，很重要）&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img data-src=&quot;https://tuchuang-1251287103.cos.ap-chongqing.myqcloud.com/tuchuang%E8%85%BE%E8%AE%AF%E4%BA%91%E5%AF%B9%E8%B1%A1%E5%AD%98%E5%82%A81.png&quot; alt=&quot;腾讯云对象存储1&quot;&gt;&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="Hexo" scheme="https://www.12173437.xyz/categories/Hexo/"/>
+    
+    
+      <category term="Hexo" scheme="https://www.12173437.xyz/tags/Hexo/"/>
+    
+  </entry>
   
   <entry>
     <title>基于esp8266的nodemcu模块的扩展板设计</title>
